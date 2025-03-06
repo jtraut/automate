@@ -18,7 +18,7 @@ quitEarly() {
 }
 
 incrementAndWriteToFile() {
-	# Note always overwrite, not appending (>>)
+	# Prevent overflows cause why the hell not
 	if (( counter >= max_value )); then
 		# Haven't done the math but this would be extremely impressive
 		echo "Counter overflow detected, reseting counter now!"
@@ -26,6 +26,7 @@ incrementAndWriteToFile() {
 	fi
 	new_line="$((++counter)), $(date)"
 	echo "Writing new line to file: $new_line"
+	# Note always overwrite, not appending (>>)
 	echo "$new_line" > "$file_name"
 }
 
