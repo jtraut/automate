@@ -8,11 +8,14 @@ readonly file_name="exampleCountAndTimestamp"
 readonly process_name=$(basename "$0") # Get from 1st arg
 readonly max_value=9223372036854775807 # Maximum 64-bit integer
 counter=0
+random_num=0 # Range 0 - 1000
 
 # Set the internal field separator to comma for reading our file
 IFS=','
 
-# Any helper functions 
+# TODO: add arg options for frequency, percentage, git creds etc.
+
+# Any helper functions
 quitEarly() {
 	echo "ERROR: Script $0 is already running, exiting now!" && exit 1
 }
@@ -38,6 +41,13 @@ pushChangesToGit() {
 	# Push changes to remote repo
 	git push
 	echo "Pushed changes to git."
+}
+
+generateRandomNum() {
+	min=0
+	max=1000
+	random_num=$((RANDOM%($max-$min+1)+$min))
+	echo "Random number generated between 0 and 1000: $random_num"
 }
 
 # Make sure only running a single instance
@@ -85,12 +95,25 @@ while true; do
 		fi
 	fi
 
-	# Increment counter and write to file
-	incrementAndWriteToFile
+	# Using RNG, trigger events on an irregular basis
+	generateRandomNum
+	# 0-100%, fractions allowed i.e. 0.25
+	percent_accepted=40.0 # TODO: put this down to 1 or less
+	# Windows and git bash don't come with bc by default so use awk instead...
+	#upper_limit=$(echo "$percent_accepted" * 10 | bc)
+	upper_limit=$(awk "BEGIN {print $percent_accepted * 10}")
+	echo "percentage $percent_accepted upper limit $upper_limit"
+	
+	if (( random_num <= upper_limit )); then
+		echo "Random event triggered!"
+		# Increment counter and write to file
+		incrementAndWriteToFile
 
-	# Now publish the changes back to the git repository
-	pushChangesToGit
-
+		# Now publish the changes back to the git repository
+		pushChangesToGit
+	else
+		echo "Random number $random_num did not fall within percentage limit $upper_limit, doing nothing..."
+	fi
 	# Run this every 60 seconds
 	sleep 60
 done
