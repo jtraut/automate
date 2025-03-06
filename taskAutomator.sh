@@ -3,10 +3,16 @@
 # This script demonstrates creating, reading, & modifying a file
 # whilst committing the changes to GitHub on an irregular interval.
 
-# Constants and global variables
+# Constants
 readonly file_name="exampleCountAndTimestamp"
 readonly process_name=$(basename "$0") # Get from 1st arg
 readonly max_value=9223372036854775807 # Maximum 64-bit integer
+readonly percent_accepted=1.5 # 0-100%, fractions allowed i.e. 0.25
+# Windows and git bash don't come with bc by default so use awk instead...
+readonly upper_limit=$(awk "BEGIN {print $percent_accepted * 10}")
+readonly interval=60 # seconds between potential events
+
+# Global Variables
 counter=0
 random_num=0 # Range 0 - 1000
 
@@ -71,19 +77,18 @@ fi
 # For Linux:
 #pidof -o %PPID -x $0 >/dev/null && quitEarly
 
-echo "$process_name is now running!"
+echo "$process_name is now running on interval of $interval seconds"
+echo "with event trigger percentage $percent_accepted% (upper limit $upper_limit)"
 
 # Enter an infinite loop
 while true; do
-	# TODO: add a random generator for % chance of doing anything at all
 	if [ -f "$file_name" ] && [ "$counter" -eq 0 ]; then
 		# File exists but our counter is zero so try reading value from file
-		echo "reading counter from file now!"
 		file_content=$(<"$file_name")
 		# Split the file line into array
 		split_line=()
 		read -ra split_line <<< "$file_content"
-		# Make sure we get a tuple value
+		# Make sure we get a tuple pair of values
 		if [ ${#split_line[@]} -eq 2 ]; then
 			# Then store the counter value
 			counter=${split_line[0]}
@@ -92,18 +97,13 @@ while true; do
 			echo "got timestamp of last file update: $datetime"
 		else
 			echo "Read invalid file line! Overwriting file now."
+			incrementAndWriteToFile
 		fi
 	fi
 
 	# Using RNG, trigger events on an irregular basis
 	generateRandomNum
-	# 0-100%, fractions allowed i.e. 0.25
-	percent_accepted=40.0 # TODO: put this down to 1 or less
-	# Windows and git bash don't come with bc by default so use awk instead...
-	#upper_limit=$(echo "$percent_accepted" * 10 | bc)
-	upper_limit=$(awk "BEGIN {print $percent_accepted * 10}")
-	echo "percentage $percent_accepted upper limit $upper_limit"
-	
+	# Check if random number falls within our percentage threshold
 	if (( random_num <= upper_limit )); then
 		echo "Random event triggered!"
 		# Increment counter and write to file
