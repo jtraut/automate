@@ -6,6 +6,7 @@
 # Constants and global variables
 readonly file_name="exampleCountAndTimestamp"
 readonly process_name=$(basename "$0") # Get from 1st arg
+readonly max_value=9223372036854775807 # Maximum 64-bit integer
 counter=0
 
 # Set the internal field separator to comma for reading our file
@@ -18,6 +19,11 @@ quitEarly() {
 
 incrementAndWriteToFile() {
 	# Note always overwrite, not appending (>>)
+	if (( counter >= max_value )); then
+		# Haven't done the math but this would be extremely impressive
+		echo "Counter overflow detected, reseting counter now!"
+		counter=0
+	fi
 	new_line="$((++counter)), $(date)"
 	echo "Writing new line to file: $new_line"
 	echo "$new_line" > "$file_name"
@@ -85,7 +91,7 @@ while true; do
 	pushChangesToGit
 
 	# Run this every 60 seconds
-	sleep 10 #60
+	sleep 60
 done
 
 # Should never hit this (only on error out of loop)
