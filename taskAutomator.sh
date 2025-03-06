@@ -114,8 +114,8 @@ while true; do
 	else
 		echo "Random number $random_num did not fall within percentage limit $upper_limit, doing nothing..."
 	fi
-	# Run this every 60 seconds
-	sleep 60
+	# Run this every 60 seconds (by default)
+	sleep $interval
 done
 
 # Should never hit this (only on error out of loop)

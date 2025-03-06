@@ -4,7 +4,7 @@ Bash script automation example.
 Written in vim.
 
 Instructions:
-git clone then change directory `cd automate` and run the script `./taskAutomator.sh`
+git fork then change directory `cd automate` and run the script `./taskAutomator.sh`
 
 Make sure to have your git account configured:
 
