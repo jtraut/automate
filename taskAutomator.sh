@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This script demonstrates creating, reading, & modifying a file
-# whilst committing the changes to GitHub on an irregular interval.
+# whilst committing the changes to GitHub on an irregular basis.
 
 # Constants
 readonly file_name="exampleCountAndTimestamp"
