@@ -101,8 +101,8 @@ pushChangesToGit() {
 }
 
 generateRandomNum() {
-	min=0
-	max=1000
+	local min=0
+	local max=1000
 	random_num=$((RANDOM%($max-$min+1)+$min))
 	echo "Random number generated between 0 and 1000: $random_num"
 }
@@ -168,8 +168,6 @@ while true; do
 	# Using RNG, trigger events on an irregular basis
 	generateRandomNum
 	# Check if random number falls within our percentage threshold
-	# TODO: assuming this will break if upper_limit is floating point i.e. percent input such as 5.755
-	#if (( random_num <= upper_limit )); then
 	isFloatWithinRange $random_num 0 $upper_limit
 	if [ "$within_range" = true ]; then
 		echo "Random event triggered!"
