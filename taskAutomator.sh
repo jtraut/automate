@@ -54,18 +54,6 @@ checkOptionalPercent() {
 	else
 		echo "Input $1 is not within valid percentage range [0, 100]"
 	fi
-
-	#if awk "BEGIN {exit !($1 > $min && $1 <= $max)}" ; then
-      	#	echo "Input percent is valid, overwriting default percent now."
-	#	percent_accepted="$1"
-	#else
-	#	echo "Input $1 is not within range (0, 100]"
-	#fi
-
-        #if (( $1 > 0 && $1 <= 100 )); then
-	#	echo "Input percent is valid, overwriting default percent now"
-        #        percent_accepted="$1"
-        #fi
 }
 
 checkOptionalInterval() {
@@ -134,7 +122,6 @@ if [ $# -ge 1 ]; then
         echo "Script called with optional arg count: $#"
 	checkOptionalPercent $1
         if [ $# -ge 2 ]; then
-		echo "got arg for interval!!!!!!!!"
                 checkOptionalInterval $2
         fi
 fi
