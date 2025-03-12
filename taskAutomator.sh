@@ -170,7 +170,7 @@ while true; do
 	# Check if random number falls within our percentage threshold
 	# TODO: assuming this will break if upper_limit is floating point i.e. percent input such as 5.755
 	#if (( random_num <= upper_limit )); then
-	isFloatWithinRange random_num 0 upper_limit
+	isFloatWithinRange $random_num 0 $upper_limit
 	if [ "$within_range" = true ]; then
 		echo "Random event triggered!"
 		# Increment counter and write to file
