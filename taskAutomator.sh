@@ -7,23 +7,74 @@
 readonly file_name="exampleCountAndTimestamp"
 readonly process_name=$(basename "$0") # Get from 1st arg
 readonly max_value=9223372036854775807 # Maximum 64-bit integer
-readonly percent_accepted=1.5 # 0-100%, fractions allowed i.e. 0.25
-# Windows and git bash don't come with bc by default so use awk instead...
-readonly upper_limit=$(awk "BEGIN {print $percent_accepted * 10}")
-readonly interval=60 # seconds between potential events
 
 # Global Variables
 counter=0
 random_num=0 # Range 0 - 1000
+within_range=false 
+
+# Default values with option to overwrite
+percent_accepted=1.5 # 0-100%, fractions allowed i.e. 0.25 (arg 1)
+interval=60 # seconds between potential events (arg 2)
 
 # Set the internal field separator to comma for reading our file
 IFS=','
 
-# TODO: add arg options for frequency, percentage, git creds etc.
-
 # Any helper functions
 quitEarly() {
 	echo "ERROR: Script $0 is already running, exiting now!" && exit 1
+}
+
+# is value $1 within min $2 & max $3
+isFloatWithinRange() {
+	local num="$1"
+	local min="$2"
+	local max="$3"
+        if awk "BEGIN {exit ($num >= $min && $num <= $max)}" ; then
+		# hm, this seems backwards but it provides expected results
+		echo "$num is not within range [$min, $max]"
+		within_range=false
+        else
+                echo "$num is within range [$min, $max]"
+		within_range=true
+        fi
+}
+
+checkOptionalPercent() {
+        echo "Detected optional percent arg: $1"
+        # Make sure percentage is within (0-100]
+	# TODO: currently an error prone workaround due to lack of bc
+	min=0.0
+	max=100.0
+	isFloatWithinRange $1 $min $max
+	# null / empty safe check
+	if [ "$within_range" = true ]; then
+		echo "Input percent is valid, overwriting default percent now."
+        	percent_accepted="$1"
+	else
+		echo "Input $1 is not within valid percentage range [0, 100]"
+	fi
+
+	#if awk "BEGIN {exit !($1 > $min && $1 <= $max)}" ; then
+      	#	echo "Input percent is valid, overwriting default percent now."
+	#	percent_accepted="$1"
+	#else
+	#	echo "Input $1 is not within range (0, 100]"
+	#fi
+
+        #if (( $1 > 0 && $1 <= 100 )); then
+	#	echo "Input percent is valid, overwriting default percent now"
+        #        percent_accepted="$1"
+        #fi
+}
+
+checkOptionalInterval() {
+        # Make sure interval is greater than 0
+	echo "Detected optional interval arg: $1"
+        if [[ "$1" -gt 0 ]]; then
+		echo "Input interval is valid, overwriting default interval now"
+                interval="$1"
+        fi
 }
 
 incrementAndWriteToFile() {
@@ -77,6 +128,19 @@ fi
 # For Linux:
 #pidof -o %PPID -x $0 >/dev/null && quitEarly
 
+# TODO: add arg options for git creds
+# Check for optional args
+if [ $# -ge 2 ]; then
+        checkOptionalPercent $1
+        if [ $# -ge 3 ]; then
+                checkOptionalInterval $2
+        fi
+fi
+
+# Calculate upper limit for triggering random event now that percent has been resovled
+# Windows and git bash don't come with bc by default so use awk instead...
+readonly upper_limit=$(awk "BEGIN {print $percent_accepted * 10}")
+
 echo "$process_name is now running on interval of $interval seconds"
 echo "with event trigger percentage $percent_accepted% (upper limit $upper_limit)"
 
@@ -104,7 +168,10 @@ while true; do
 	# Using RNG, trigger events on an irregular basis
 	generateRandomNum
 	# Check if random number falls within our percentage threshold
-	if (( random_num <= upper_limit )); then
+	# TODO: assuming this will break if upper_limit is floating point i.e. percent input such as 5.755
+	#if (( random_num <= upper_limit )); then
+	isFloatWithinRange random_num 0 upper_limit
+	if [ "$within_range" = true ]; then
 		echo "Random event triggered!"
 		# Increment counter and write to file
 		incrementAndWriteToFile
