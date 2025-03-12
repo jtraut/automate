@@ -131,8 +131,10 @@ fi
 # TODO: add arg options for git creds
 # Check for optional args
 if [ $# -ge 2 ]; then
-        checkOptionalPercent $1
+        echo "Script called with optional arg count: $#"
+	checkOptionalPercent $1
         if [ $# -ge 3 ]; then
+		echo "got arg for interval!!!!!!!!"
                 checkOptionalInterval $2
         fi
 fi
