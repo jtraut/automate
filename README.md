@@ -7,7 +7,7 @@ Instructions:
 
 `git fork` then change directory `cd automate` and run the script `./taskAutomator.sh`
 
-Script accepts optional args for event trigger percentage and frequeny, e.g.
+Script accepts optional args for event trigger percentage and frequency, e.g.
 
 `./taskAutomator.sh 5.75` to trigger an event 5.75% of the time on the default 60s interval.
 
